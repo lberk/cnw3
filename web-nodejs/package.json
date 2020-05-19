@@ -67,6 +67,7 @@
     "gulp": "^4.0.2",
     "gulp-ng-config": "^1.5.1",
     "kube-probe": "^0.3.0",
-    "license-reporter": "^1.2.0"
+    "license-reporter": "^1.2.0",
+    "cloudevents-sdk": "~1.0.0"
   }
 }

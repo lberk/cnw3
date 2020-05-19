@@ -9,30 +9,32 @@ const cors = require('cors');
 const probe = require('kube-probe');
 const http = require('http')
 
-// notify the event broker we have started
-console.log("Checking for broker " + process.env.COOLSTORE_BROKER_ENDPOINT);
-if (process.env.COOLSTORE_BROKER_ENDPOINT != null)
+// notify the event sink we have started
+console.log("Checking for K_SINK " + process.env.K_SINK);
+if (process.env.K_SINK != null)
 {
     const options = {
-        hostname: process.env.COOLSTORE_BROKER_ENDPOINT,
+        hostname: process.env.K_SINK
         method: 'POST',
         headers: {
-          'Content-Length': 0,
-          "Ce-Id": "wakeup",
-          "Ce-Specversion": "1.0",
-          "Ce-Type": "web-wakeup",
-          "Ce-Source": "web-coolstore",
-          "Content-Type": "application/json" },
+            'Content-Length': 0,
+            "Ce-Id": "wakeup", //This should really be a UUID
+            "Ce-Specversion": "1.0",
+            "Ce-Type": "web-wakeup",
+            "Ce-Source": "web-coolstore",
+            "Content-Type": "application/json",
+            "ce-extention": "wakeup"
+        },
       }
-      
+
       const req = http.request(options, res => {
-        console.log(`Broker response statusCode: ${res.statusCode}`)      
+        console.log(`Broker response statusCode: ${res.statusCode}`)
       })
-      
+
       req.on('error', error => {
-        console.log("Failed to contact broker " + process.env.COOLSTORE_BROKER_ENDPOINT + " Error: " + error);
+        console.log("Failed to contact SINK " + process.env.K_SINK + " Error: " + error);
       })
-      
+
       req.write("")
       req.end()
 

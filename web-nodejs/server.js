@@ -8,35 +8,40 @@ const app = express();
 const cors = require('cors');
 const probe = require('kube-probe');
 const http = require('http')
+const cloudevent = require('cloudevents-sdk')
+const HTTPBinary = require('cloudevents-sdk/lib/bindings/http/emitter_binary_1.js')
 
 // notify the event sink we have started
 console.log("Checking for K_SINK " + process.env.K_SINK);
 if (process.env.K_SINK != null)
 {
-    const options = {
-        hostname: process.env.K_SINK
-        method: 'POST',
-        headers: {
-            'Content-Length': 0,
-            "Ce-Id": "wakeup", //This should really be a UUID
-            "Ce-Specversion": "1.0",
-            "Ce-Type": "web-wakeup",
-            "Ce-Source": "web-coolstore",
-            "Content-Type": "application/json",
-            "ce-extention": "wakeup"
-        },
-      }
+    const myevent = new CloudEvent()
+          .source('web-coolstore')
+          .type('web-wakeup')
+          .dataContentType('application/json')
+          .addExtension("coolstore.compnent", "web")
+          .time(new Date())
+          .data('{"msg": "GOOD MORNING VIETNAM"}')
 
-      const req = http.request(options, res => {
-        console.log(`Broker response statusCode: ${res.statusCode}`)
-      })
+      const emitter = new HTTPBinary({
+          method: 'POST',
+          url: process.env.K_SINK
+      }).emitter
 
-      req.on('error', error => {
-        console.log("Failed to contact SINK " + process.env.K_SINK + " Error: " + error);
-      })
+    emitter.emit(myevent).then((res) => {
+        console.log(`Sent event: ${JSON.stringify(newCloudEvent.format(), null, 2)}`)
+        console.log(`K_SINK responded: ${JSON.stringify({ status: res.status, headers: res.headers, data: res.data }, null, 2)}`)
+    })
+//      const req = http.request(options, res => {
+//        console.log(`Broker response statusCode: ${res.statusCode}`)
+//      })
 
-      req.write("")
-      req.end()
+//      req.on('error', error => {
+//        console.log("Failed to contact SINK " + process.env.K_SINK + " Error: " + error);
+//      })
+
+//    req.write("")
+//      req.end()
 
 }
 
